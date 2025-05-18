@@ -26,6 +26,25 @@
 - ✅ Day-based filtering
 - ✅ Database seed script with sample data for all supported days
 
+### Teacher Feature
+
+- ✅ Teacher entity with CRUD operations
+- ✅ Avatar support for teacher profiles
+- ✅ File upload functionality for avatars
+- ✅ Cloudinary integration for cloud storage
+- ✅ Fallback to local storage when needed
+- ✅ Optimized avatar endpoints in API
+- ✅ Swagger documentation for teacher endpoints
+
+### File Management
+
+- ✅ Upload service for handling file uploads
+- ✅ Cloudinary integration for cloud storage
+- ✅ Local file storage fallback
+- ✅ Automatic directory creation
+- ✅ File URL generation
+- ✅ Proper error handling for uploads
+
 ### Code Organization
 
 - ✅ Clean architecture with proper separation of concerns
@@ -42,6 +61,8 @@
 - ✅ Swagger documentation setup
 - ✅ Error handling with proper HTTP status codes
 - ✅ Prisma service for dependency injection
+- ✅ Static file serving for uploaded files
+- ✅ CORS configuration
 
 ## What's Left to Build
 
@@ -53,6 +74,7 @@
 - 🔲 Add sorting options for schedule endpoints
 - 🔲 Add filtering by teacher name and subject
 - 🔲 Add more validation rules for edge cases
+- 🔲 File type and size validation for uploads
 
 ### Medium-term
 
@@ -61,6 +83,7 @@
 - 🔲 Logging system for auditing
 - 🔲 Rate limiting for API endpoints
 - 🔲 Implement health checks
+- 🔲 Image processing for avatars (resize, crop)
 
 ### Long-term
 
@@ -81,6 +104,14 @@ The application has a functioning Schedule module with the ability to:
 - Filter schedules by day of the week
 - Access properly documented API via Swagger UI
 
+The application now also includes a Teacher module with:
+
+- Complete CRUD operations for teacher records
+- Avatar management with file upload support
+- Integration with Cloudinary for cloud storage
+- Fallback to local file storage when needed
+- RESTful API endpoints with Swagger documentation
+
 Code architecture has been improved with:
 
 - Implementation of Repository Pattern to isolate database operations
@@ -89,18 +120,18 @@ Code architecture has been improved with:
 - Enhanced type safety throughout the application
 - Normalized database schema with proper relationships
 
-The application runs on port 3001 (changed from 3000 to avoid conflicts).
+The application runs on port 3000.
 
 ## Known Issues
 
-1. **Port Conflict**: There may be issues with port 3000 being used by another application, which is why the port was changed to 3001.
+1. **Time Format Handling**: The application enforces specific time slots, but timezone differences still need to be considered for worldwide usage.
 
-2. **Time Format Handling**: The application now enforces specific time slots, but timezone differences still need to be considered for worldwide usage.
+2. **Missing Pagination**: The endpoints that return multiple schedules don't support pagination yet, which could cause performance issues with large datasets.
 
-3. **Missing Pagination**: The endpoints that return multiple schedules don't support pagination yet, which could cause performance issues with large datasets.
+3. **Limited Testing**: The application lacks comprehensive test coverage, which is needed for ensuring reliability.
 
-4. **Limited Testing**: The application lacks comprehensive test coverage, which is needed for ensuring reliability.
+4. **Complex Database Relationships**: The normalized database schema may introduce complexity in query operations, which should be monitored for performance.
 
-5. **Complex Database Relationships**: The normalized database schema may introduce complexity in query operations, which should be monitored for performance.
+5. **File Upload Limitations**: File uploads currently lack size and type validation, which should be added for security.
 
 This document will be updated regularly as development progresses and as additional features are implemented.

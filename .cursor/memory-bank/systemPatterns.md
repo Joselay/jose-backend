@@ -17,22 +17,35 @@ The application follows the NestJS modular architecture pattern, which emphasize
 - Fixed time slots: 5:45-6:45pm, 6:45-7:45pm, and 7:45-8:45pm
 - One hour duration for all classes
 - Fixed set of valid time slots for consistency
+- Teachers can have profile avatars stored in Cloudinary or locally
 
 ### Database Schema
 
 - PostgreSQL database hosted on Neon
 - Using Prisma ORM for type-safe database operations
-- The core model is the `Schedule` entity
+- The core models are the `Schedule` and `Teacher` entities
 - Time-based data stored as strings in "HH:MM" format for simplicity
 - Normalized database structure with separate tables for teachers, rooms, subjects, and time slots
+- Avatar URLs stored in the Teacher model
+
+### File Storage
+
+- Dual storage strategy with Cloudinary (primary) and local storage (fallback)
+- Environment-based decision for storage location
+- Automatic fallback to local storage when Cloudinary is not configured
+- Cloud storage for production environments
+- Local storage for development and testing
+- URL generation based on storage location
 
 ### API Design
 
 - RESTful API endpoints following standard conventions
 - Proper input validation using class-validator decorators
 - Swagger documentation using NestJS Swagger integration
-- Standard CRUD operations for schedule entries
+- Standard CRUD operations for schedule and teacher entries
 - Special endpoints for filtering by day and finding current active class
+- File upload endpoints for teacher avatars
+- Multipart/form-data support for file uploads
 
 ### Validation
 
@@ -53,7 +66,7 @@ The application follows the NestJS modular architecture pattern, which emphasize
 
 ### Repository Pattern
 
-- ScheduleRepositoryService abstracts database operations
+- ScheduleRepositoryService and TeacherRepositoryService abstract database operations
 - Handles all direct interactions with the Prisma client
 - Focuses on data access concerns only
 - Provides specialized methods for database operations
@@ -69,11 +82,27 @@ The application follows the NestJS modular architecture pattern, which emphasize
 
 ### Service Layer Pattern
 
-- ScheduleService implements business logic
+- Services implement business logic (ScheduleService, TeacherService, UploadService)
 - Uses repository for data access
 - Uses mapper for entity transformations
 - Focuses on orchestration and error handling
 - Keeps business rules separate from data access and presentation
+
+### Strategy Pattern
+
+- UploadService implements different storage strategies
+- Dynamically selects between Cloudinary and local storage
+- Encapsulates the complexity of each storage method
+- Provides a unified interface for file uploads
+- Allows for easy switching between strategies
+
+### Factory Method Pattern
+
+- Entity classes implement factory methods (fromPrisma, fromPrismaArray)
+- Centralizes entity creation logic
+- Ensures consistent entity initialization
+- Abstracts away entity mapping complexities
+- Used across the application for entity creation
 
 ### Dependency Injection
 
@@ -81,18 +110,21 @@ The application follows the NestJS modular architecture pattern, which emphasize
 - Services injected into controllers
 - Repository and Mapper services injected into main service
 - PrismaService injected into repository service
+- UploadService injected where file handling is needed
 
 ### DTO Pattern
 
 - Separate DTOs for input validation and data transfer
-- CreateScheduleDto for creating new entries with validation
-- UpdateScheduleDto (extends PartialType of CreateScheduleDto) for updates
+- CreateScheduleDto and CreateTeacherDto for creating new entries with validation
+- UpdateScheduleDto and UpdateTeacherDto for updates
+- Uses class-validator for input validation
 
 ### Entity Pattern
 
-- Schedule entity represents the domain model
-- Contains business logic methods (getDuration, isInSession, etc.)
+- Entities represent domain models (Schedule, Teacher)
+- Contains business logic methods
 - Implements factory methods for data transformation
+- Encapsulates domain-specific behavior
 
 ### Constants Pattern
 
@@ -106,18 +138,39 @@ The application follows the NestJS modular architecture pattern, which emphasize
 ```mermaid
 graph TD
     A[AppModule] --> B[ScheduleModule]
+    A --> T[TeacherModule]
+
     B --> C[ScheduleController]
     B --> D[ScheduleService]
     B --> M[ScheduleMapperService]
     B --> N[ScheduleRepositoryService]
+
+    T --> TC[TeacherController]
+    T --> TS[TeacherService]
+    T --> TR[TeacherRepositoryService]
+    T --> US[UploadService]
+
     C --> D
     D --> M
     D --> N
+
+    TC --> TS
+    TC --> US
+    TS --> TR
+
     N --> E[PrismaService]
+    TR --> E
     E --> F[PostgreSQL Database]
+
     C --> G[CreateScheduleDto]
     C --> H[UpdateScheduleDto]
+
+    TC --> TCD[CreateTeacherDto]
+    TC --> TUD[UpdateTeacherDto]
+
     D --> I[Schedule Entity]
+    TS --> TE[Teacher Entity]
+
     M --> I
     G --> J[Constants]
     I --> J
@@ -125,15 +178,24 @@ graph TD
     J --> L[TIME_SLOTS]
     G --> O[Common Types]
     O --> P[Regex Patterns]
+
+    US --> CL[Cloudinary]
+    US --> LS[Local Storage]
 ```
 
 ## File Organization
 
-- `/src/modules/schedule/controllers`: Contains API controllers
-- `/src/modules/schedule/services`: Contains business logic, repository, and mapper services
-- `/src/modules/schedule/dto`: Contains data transfer objects for validation
-- `/src/modules/schedule/entities`: Contains entity definitions
-- `/src/modules/schedule/constants`: Contains enums and constant values
-- `/src/common/services`: Contains shared services like PrismaService
+- `/src/modules/schedule/controllers`: Contains schedule API controllers
+- `/src/modules/schedule/services`: Contains schedule business logic, repository, and mapper services
+- `/src/modules/schedule/dto`: Contains schedule data transfer objects for validation
+- `/src/modules/schedule/entities`: Contains schedule entity definitions
+- `/src/modules/schedule/constants`: Contains schedule-related enums and constant values
+- `/src/modules/teacher/controllers`: Contains teacher API controllers
+- `/src/modules/teacher/services`: Contains teacher business logic and repository services
+- `/src/modules/teacher/dto`: Contains teacher data transfer objects for validation
+- `/src/modules/teacher/entities`: Contains teacher entity definitions
+- `/src/common/services`: Contains shared services like PrismaService and UploadService
 - `/src/common/types`: Contains shared types and regex patterns
+- `/src/common/config`: Contains configuration files like CloudinaryConfig
 - `/prisma`: Contains database schema and migrations
+- `/uploads`: Contains locally stored uploaded files
