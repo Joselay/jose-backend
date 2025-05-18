@@ -55,7 +55,7 @@ npm install
 
    - Copy `.env.example` to `.env`
    - Update the `DATABASE_URL` with your PostgreSQL connection string (or Neon database URL)
-   - Set `PORT` to your preferred port (defaults to 3001)
+   - Set `PORT` to your preferred port (defaults to 3000)
 
 4. Generate Prisma client:
 
@@ -95,7 +95,7 @@ npm run start:prod
 Once the application is running, you can access the Swagger documentation at:
 
 ```
-http://localhost:3001/api
+http://localhost:3000/api
 ```
 
 ## Database Management
