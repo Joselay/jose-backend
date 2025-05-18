@@ -41,7 +41,7 @@ A personal backend application for Jose, featuring various productivity tools st
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/jose-backend.git
+git clone https://github.com/Joselay/jose-backend.git
 cd jose-backend
 ```
 
@@ -146,15 +146,6 @@ src/
 | PUT    | `/schedule/:id`      | Update a schedule                |
 | DELETE | `/schedule/:id`      | Delete a schedule                |
 
-## Recent Changes
-
-- Renamed `ClassSchedule` model to `Schedule` for better clarity and consistency
-- Updated database schema with `schedules` table
-- Enhanced project structure with constants directory for schedule module
-- Implemented fixed time slots system with validation
-- Added business logic methods to Schedule entity
-- Changed default port from 3000 to 3001
-
 ## License
 
-This project is private and for personal use only.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
