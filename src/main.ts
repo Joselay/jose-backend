@@ -1,12 +1,19 @@
+import { CloudinaryConfig } from '@common/config/cloudinary.config';
 import { AppModule } from '@modules/app';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as express from 'express';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
+
+  CloudinaryConfig.configureCloudinary();
+
+  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -23,6 +30,7 @@ async function bootstrap() {
     )
     .setVersion('1.0')
     .addTag('schedule', 'School schedule management endpoints')
+    .addTag('teachers', 'Teacher management endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

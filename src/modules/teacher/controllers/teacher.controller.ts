@@ -1,3 +1,4 @@
+import { UploadService } from '@common/services';
 import { CreateTeacherDto, UpdateTeacherDto } from '@modules/teacher/dto';
 import { TeacherService } from '@modules/teacher/services';
 import {
@@ -8,11 +9,15 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -22,7 +27,10 @@ import {
 @ApiTags('teachers')
 @Controller('teachers')
 export class TeacherController {
-  constructor(private readonly teacherService: TeacherService) {}
+  constructor(
+    private readonly teacherService: TeacherService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all teachers' })
@@ -61,7 +69,11 @@ export class TeacherController {
 
   @Put(':id')
   @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiOperation({ summary: 'Update a teacher' })
+  @ApiOperation({
+    summary: 'Update a teacher',
+    description:
+      'Update teacher details including name and avatar URL. You can set avatar directly with a URL using this endpoint or upload an image file using the dedicated avatar upload endpoint.',
+  })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
   @ApiBody({ type: UpdateTeacherDto })
   @ApiResponse({
@@ -88,31 +100,42 @@ export class TeacherController {
     return this.teacherService.deleteTeacher(id);
   }
 
-  @Put(':id/avatar')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  @ApiOperation({ summary: 'Update a teacher avatar' })
+  @Post(':id/avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload a teacher avatar image',
+    description:
+      'Upload an image file to be used as the teacher avatar. The file will be processed and stored, and the resulting URL will update the teacher record.',
+  })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        avatar: {
+        file: {
           type: 'string',
-          example: 'https://example.com/avatars/teacher.jpg',
-          description: 'URL or path to the teacher avatar image',
+          format: 'binary',
+          description: 'Teacher avatar image file',
         },
       },
     },
   })
   @ApiResponse({
     status: 200,
-    description: 'The teacher avatar has been successfully updated.',
+    description: 'The teacher avatar has been successfully uploaded.',
   })
   @ApiResponse({ status: 404, description: 'Teacher not found.' })
-  async updateTeacherAvatar(
+  @ApiResponse({ status: 400, description: 'Invalid file.' })
+  async uploadTeacherAvatar(
     @Param('id') id: string,
-    @Body('avatar') avatar: string,
+    @UploadedFile() file: any,
   ) {
-    return this.teacherService.updateTeacherAvatar(id, avatar);
+    if (!file) {
+      return { error: 'No file uploaded' };
+    }
+
+    const avatarUrl = await this.uploadService.uploadFile(file);
+    return this.teacherService.updateTeacherAvatar(id, avatarUrl);
   }
 }
