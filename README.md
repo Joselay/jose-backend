@@ -1,15 +1,17 @@
 # Jose Backend
 
-A personal backend application for Jose, featuring various productivity tools starting with a school schedule management system. The application is built with NestJS, TypeScript, Prisma, PostgreSQL, and includes Swagger documentation.
+A personal backend application for Jose, featuring various productivity tools starting with a schedule management system. The application is built with NestJS, TypeScript, Prisma, PostgreSQL, and includes Swagger documentation.
 
 ## Features
 
-### School Schedule Management
+### Schedule Management
 
 - Get current active class based on real-time
 - View full schedule or filter by day
-- Add, update, and delete class schedules
-- Comprehensive class information (teacher, room, time)
+- Add, update, and delete schedules
+- Comprehensive class information (teacher, room, time, subject)
+- Fixed time slots system (5:45-6:45pm, 6:45-7:45pm, 7:45-8:45pm)
+- Support for Monday through Saturday (no Sunday schedules)
 
 ### Future Features (Planned)
 
@@ -18,13 +20,13 @@ A personal backend application for Jose, featuring various productivity tools st
 
 ## Technologies
 
-- **Framework**: NestJS
-- **Language**: TypeScript
+- **Framework**: NestJS (v11)
+- **Language**: TypeScript (v5.7)
 - **Database**: PostgreSQL (with Neon cloud database)
-- **ORM**: Prisma
+- **ORM**: Prisma (v6)
 - **Validation**: class-validator and class-transformer
-- **Documentation**: Swagger
-- **Testing**: Jest
+- **Documentation**: Swagger (NestJS Swagger v11)
+- **Testing**: Jest (v29)
 
 ## Setup Instructions
 
@@ -53,6 +55,7 @@ npm install
 
    - Copy `.env.example` to `.env`
    - Update the `DATABASE_URL` with your PostgreSQL connection string (or Neon database URL)
+   - Set `PORT` to your preferred port (defaults to 3001)
 
 4. Generate Prisma client:
 
@@ -92,7 +95,7 @@ npm run start:prod
 Once the application is running, you can access the Swagger documentation at:
 
 ```
-http://localhost:3000/api
+http://localhost:3001/api
 ```
 
 ## Database Management
@@ -107,31 +110,50 @@ http://localhost:3000/api
 ```
 src/
 ├── common/              # Common utilities and cross-cutting concerns
-│   ├── decorators/      # Custom decorators
-│   ├── filters/         # Exception filters
-│   ├── guards/          # Authentication and authorization guards
-│   ├── interceptors/    # Request/response interceptors
-│   ├── interfaces/      # Shared interfaces
-│   ├── middleware/      # HTTP middleware
-│   ├── services/        # Common services (e.g., Prisma service)
-│   └── pipes/           # Data transformation and validation pipes
-├── config/              # Configuration settings
-│   └── env/             # Environment-specific configuration
+│   ├── services/        # Common services (e.g., PrismaService)
+│   └── types/           # Shared types and regex patterns
 ├── modules/             # Feature modules
-│   ├── schedule/        # School schedule module
+│   ├── schedule/        # Schedule module
+│   │   ├── constants/   # Constants, enums and time slots
 │   │   ├── controllers/ # Schedule controllers
 │   │   ├── dto/         # Data transfer objects
-│   │   ├── entities/    # Database entities
+│   │   ├── entities/    # Database entities with business logic
 │   │   ├── services/    # Business logic services
 │   │   └── schedule.module.ts # Module definition
-│   └── future-features/ # Placeholder for future feature modules
-├── shared/              # Shared resources across modules
-│   ├── dto/             # Shared DTOs
-│   ├── entities/        # Shared database entities
-│   └── utils/           # Utility functions
 ├── app.module.ts        # Main application module
 └── main.ts              # Application entry point
 ```
+
+## Business Rules
+
+- Schedule system only operates Monday through Saturday (no Sunday)
+- Fixed time slots for all classes:
+  - First Period: 5:45pm - 6:45pm
+  - Second Period: 6:45pm - 7:45pm
+  - Third Period: 7:45pm - 8:45pm
+- All classes are one hour in duration
+- Input validation ensures only valid time slots and days are accepted
+
+## API Endpoints
+
+| Method | Endpoint             | Description                      |
+| ------ | -------------------- | -------------------------------- |
+| GET    | `/schedule`          | Get all schedules                |
+| GET    | `/schedule/current`  | Get current active class         |
+| GET    | `/schedule/day/:day` | Get schedules for a specific day |
+| GET    | `/schedule/:id`      | Get a schedule by ID             |
+| POST   | `/schedule`          | Create a new schedule            |
+| PUT    | `/schedule/:id`      | Update a schedule                |
+| DELETE | `/schedule/:id`      | Delete a schedule                |
+
+## Recent Changes
+
+- Renamed `ClassSchedule` model to `Schedule` for better clarity and consistency
+- Updated database schema with `schedules` table
+- Enhanced project structure with constants directory for schedule module
+- Implemented fixed time slots system with validation
+- Added business logic methods to Schedule entity
+- Changed default port from 3000 to 3001
 
 ## License
 
