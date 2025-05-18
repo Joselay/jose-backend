@@ -1,3 +1,5 @@
+import { CreateScheduleDto, UpdateScheduleDto } from '@modules/schedule/dto';
+import { ScheduleService } from '@modules/schedule/services';
 import {
   Body,
   Controller,
@@ -16,8 +18,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateScheduleDto, UpdateScheduleDto } from '../dto';
-import { ScheduleService } from '../services';
 
 @ApiTags('schedule')
 @Controller('schedule')

@@ -1,7 +1,11 @@
+import {
+  Day,
+  findTimeSlotByStartTime,
+  TIME_SLOTS,
+} from '@modules/schedule/constants';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
 import { IsDate, IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
-import { Day, findTimeSlotByStartTime, TIME_SLOTS } from '../constants';
 
 export class Schedule {
   @ApiProperty({

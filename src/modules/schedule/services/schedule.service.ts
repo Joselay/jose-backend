@@ -1,4 +1,7 @@
 import { PrismaService } from '@common/services';
+import { Day } from '@modules/schedule/constants';
+import { CreateScheduleDto, UpdateScheduleDto } from '@modules/schedule/dto';
+import { Schedule } from '@modules/schedule/entities';
 import {
   Injectable,
   InternalServerErrorException,
@@ -6,9 +9,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { Day } from '../constants';
-import { CreateScheduleDto, UpdateScheduleDto } from '../dto';
-import { Schedule } from '../entities';
 
 @Injectable()
 export class ScheduleService {

@@ -1,4 +1,9 @@
 import { TIME_FORMAT_REGEX } from '@common/types';
+import {
+  Day,
+  getAvailableEndTimes,
+  getAvailableStartTimes,
+} from '@modules/schedule/constants';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
@@ -8,11 +13,6 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
-import {
-  Day,
-  getAvailableEndTimes,
-  getAvailableStartTimes,
-} from '../constants';
 
 export class IsValidStartTime {
   validate(value: string) {
