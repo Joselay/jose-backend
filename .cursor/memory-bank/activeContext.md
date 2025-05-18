@@ -2,7 +2,7 @@
 
 ## Current Work Focus
 
-The main focus has been implementing the schedule management feature with specific business rules:
+The main focus has been implementing and refining the schedule management feature with specific business rules:
 
 1. Implemented schedule feature with specific time slots and day constraints:
 
@@ -10,78 +10,81 @@ The main focus has been implementing the schedule management feature with specif
    - Fixed time slots: 5:45-6:45pm, 6:45-7:45pm, and 7:45-8:45pm
    - Enforced validation for these constraints in DTOs and entities
 
-2. Enhanced the codebase organization following NestJS best practices:
+2. Enhanced the codebase architecture following NestJS best practices:
 
-   - Improved code organization with proper separation of concerns
-   - Created constants directory for enums and other shared values
-   - Added common types directory for shared regex patterns
-   - Added business logic methods to the Schedule entity
+   - Implemented Repository Pattern with ScheduleRepositoryService
+   - Implemented Mapper Pattern with ScheduleMapperService
+   - Refactored ScheduleService to focus purely on business logic
+   - Normalized database schema with separate models (Teacher, Room, Subject, TimeSlot, Schedule)
 
-3. Fixed issues with Prisma client and improved error handling:
+3. Improved error handling and type safety:
 
-   - Changed Prisma client import from custom path to default path
    - Enhanced error handling in service methods with proper logging
    - Improved type safety throughout the application
+   - Added validation using class-validator decorators
 
 ## Recent Changes
 
-1. **Code Organization Improvements**:
+1. **Architecture Improvements**:
 
-   - Extracted Day enum to a separate file in constants directory
-   - Created time-slots.constant.ts for standard time slot definitions
-   - Added common regex patterns in a shared types directory
+   - Adopted Repository Pattern to isolate database operations
+   - Implemented Mapper Pattern for entity transformations
+   - Separated concerns in the service layer for better maintainability
+   - Created specialized services with clear responsibilities
+
+2. **Database Schema Improvements**:
+
+   - Normalized database schema with appropriate relationships
+   - Established one-to-many relationships for teachers, rooms, and subjects
+   - Created proper constraints to prevent scheduling conflicts
+   - Removed Sunday from Day enum as per business rules
+
+3. **Code Organization Enhancements**:
    - Updated imports to use barrel exports for cleaner code
-
-2. **Enhanced Validation**:
-
-   - Updated DTOs to use Day enum for proper validation
-   - Added custom validators for time slots
-   - Replaced hardcoded regex patterns with shared constants
-   - Added proper descriptions and enums to Swagger documentation
-
-3. **Business Logic Enhancements**:
-   - Added methods to work with time slots in the Schedule entity
-   - Enhanced isInSession() to properly handle days of the week
-   - Added getTimeSlot() and getPeriodLabel() utility methods
-   - Updated seed data to use the standard time slots
+   - Improved error handling and validation
+   - Enhanced entity methods for time-based calculations
+   - Added utility methods for working with schedules
 
 ## Next Steps
 
 1. **Testing**:
 
-   - Test the API endpoints with the new validation rules
+   - Write unit tests for new service architecture
+   - Test repository and mapper services independently
    - Verify that time slot constraints work correctly
-   - Check that day filtering works correctly without Sunday
+   - Ensure Day enum validation properly excludes Sunday
 
 2. **Documentation**:
 
-   - Ensure Swagger documentation reflects the available time slots
-   - Document the day constraints in the API documentation
-   - Add examples showing the expected time format
+   - Update Swagger documentation to reflect architectural changes
+   - Document database schema relationships
+   - Add examples showing proper data formats
 
 3. **Feature Enhancements**:
-   - Consider adding more advanced filtering options
    - Implement pagination for schedule listings
-   - Add statistics about schedule usage
+   - Add more advanced filtering options
+   - Consider adding statistics about schedule usage
 
 ## Active Decisions and Considerations
 
-1. **Schedule Constraints**:
+1. **Architectural Patterns**:
+
+   - Using Repository Pattern to abstract database operations
+   - Using Mapper Pattern for entity transformations
+   - Keeping services focused on specific responsibilities
+   - Adhering to separation of concerns principles
+
+2. **Schedule Constraints**:
 
    - Limited to Monday-Saturday only (no Sunday schedules)
    - Fixed time slots for consistency and ease of scheduling
    - Standard one-hour length for all classes
 
-2. **Port Configuration**:
+3. **Database Design**:
 
-   - Using port 3001 by default to avoid conflicts with other common services
-   - Updated .env file to ensure consistent port usage
-
-3. **Code Organization**:
-
-   - Constants like Day enum and TIME_SLOTS are in separate files for reuse
-   - Common regex patterns stored in shared location
-   - Proper separation between entities, DTOs, and business logic
+   - Normalized structure with proper relationships
+   - Unique constraints to prevent scheduling conflicts
+   - Separate models for different entities (Teacher, Room, Subject, TimeSlot)
 
 4. **API Design**:
 

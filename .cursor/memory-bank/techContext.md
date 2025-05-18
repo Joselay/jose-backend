@@ -12,7 +12,7 @@
 
 - **PostgreSQL**: Main database (hosted on Neon)
 - **Prisma ORM**: For database access and migrations
-- **Database Models**: Schedule (formerly ClassSchedule)
+- **Database Models**: Teacher, Room, Subject, TimeSlot, Schedule
 
 ### API Documentation
 
@@ -54,19 +54,24 @@ jose-backend/
 │   └── seed.ts                 # Seed script
 ├── src/
 │   ├── common/                 # Common utilities, services, etc.
-│   │   └── services/
-│   │       └── prisma.service.ts  # Prisma service for DI
-│   ├── config/                 # Configuration
-│   │   └── env/                # Environment configuration
+│   │   ├── services/           # Shared services
+│   │   │   └── prisma.service.ts  # Prisma service for DI
+│   │   └── types/              # Shared types and interfaces
 │   ├── modules/                # Feature modules
+│   │   ├── app/                # App module (root)
+│   │   │   ├── app.controller.ts  # Root controller
+│   │   │   ├── app.module.ts      # Main module
+│   │   │   └── app.service.ts     # App service
 │   │   └── schedule/           # Schedule module
+│   │       ├── constants/      # Constants and enums
 │   │       ├── controllers/    # HTTP controllers
 │   │       ├── dto/            # Data Transfer Objects
 │   │       ├── entities/       # Domain entities
-│   │       ├── services/       # Business logic
+│   │       ├── services/       # Business logic services
+│   │       │   ├── schedule.service.ts         # Business logic
+│   │       │   ├── schedule-mapper.service.ts  # Entity mapping
+│   │       │   └── schedule-repository.service.ts  # Data access
 │   │       └── schedule.module.ts  # Module definition
-│   ├── shared/                 # Shared code
-│   ├── app.module.ts           # Main application module
 │   └── main.ts                 # Application entry point
 ├── .env                        # Environment variables
 └── package.json                # Dependencies and scripts
@@ -78,6 +83,7 @@ jose-backend/
 
 - Using Neon PostgreSQL for cloud database hosting
 - Database schema changes require migrations
+- Normalized data structure with relationships between entities
 
 ### API Design
 
@@ -90,6 +96,14 @@ jose-backend/
 - Following TypeScript best practices
 - Using ESLint and Prettier for code quality
 - Following NestJS architecture patterns
+
+### Architectural Patterns
+
+- Repository Pattern for data access
+- Mapper Pattern for entity transformations
+- Service Layer Pattern for business logic
+- DTO Pattern for input validation
+- Entity Pattern for domain models
 
 ## Dependencies
 

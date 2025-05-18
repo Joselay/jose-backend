@@ -12,21 +12,25 @@
 ### Schedule Feature
 
 - ✅ Database connection to Neon PostgreSQL via Prisma ORM
-- ✅ Prisma schema defined with Schedule model
+- ✅ Normalized Prisma schema with Teacher, Room, Subject, TimeSlot, and Schedule models
 - ✅ DTO classes with validation (CreateScheduleDto, UpdateScheduleDto)
 - ✅ Schedule entity defined with business logic methods
 - ✅ Fixed time slots implementation (5:45-6:45pm, 6:45-7:45pm, 7:45-8:45pm)
 - ✅ Day constraints (Monday-Saturday, no Sunday)
 - ✅ Basic CRUD operations implemented
 - ✅ Controller endpoints with Swagger documentation
-- ✅ Service methods for schedule operations with error handling
+- ✅ Repository pattern with ScheduleRepositoryService
+- ✅ Mapper pattern with ScheduleMapperService
+- ✅ Service layer with ScheduleService focusing on business logic
 - ✅ Current class identification based on time
 - ✅ Day-based filtering
 - ✅ Database seed script with sample data for all supported days
 
 ### Code Organization
 
-- ✅ Clean code structure with proper separation of concerns
+- ✅ Clean architecture with proper separation of concerns
+- ✅ Repository pattern implementation for database operations
+- ✅ Mapper pattern for entity transformations
 - ✅ Constants directory for enums and shared values
 - ✅ Common types directory for shared regex patterns
 - ✅ Barrel exports (index.ts files) for cleaner imports
@@ -44,6 +48,7 @@
 ### Short-term
 
 - 🔲 Write unit tests for service methods
+- 🔲 Write unit tests for repository and mapper services
 - 🔲 Implement pagination for schedule listings
 - 🔲 Add sorting options for schedule endpoints
 - 🔲 Add filtering by teacher name and subject
@@ -76,11 +81,13 @@ The application has a functioning Schedule module with the ability to:
 - Filter schedules by day of the week
 - Access properly documented API via Swagger UI
 
-Code organization has been improved with:
+Code architecture has been improved with:
 
-- Proper separation of constants, types, and business logic
+- Implementation of Repository Pattern to isolate database operations
+- Implementation of Mapper Pattern for entity transformations
+- Proper separation of business logic from data access
 - Enhanced type safety throughout the application
-- Better error handling with specific error messages
+- Normalized database schema with proper relationships
 
 The application runs on port 3001 (changed from 3000 to avoid conflicts).
 
@@ -88,12 +95,12 @@ The application runs on port 3001 (changed from 3000 to avoid conflicts).
 
 1. **Port Conflict**: There may be issues with port 3000 being used by another application, which is why the port was changed to 3001.
 
-2. **Prisma Client Import**: Fixed the issue with importing from a custom Prisma client path by switching to the standard @prisma/client import.
+2. **Time Format Handling**: The application now enforces specific time slots, but timezone differences still need to be considered for worldwide usage.
 
-3. **Time Format Handling**: The application now enforces specific time slots, but timezone differences still need to be considered for worldwide usage.
+3. **Missing Pagination**: The endpoints that return multiple schedules don't support pagination yet, which could cause performance issues with large datasets.
 
-4. **Missing Pagination**: The endpoints that return multiple schedules don't support pagination yet, which could cause performance issues with large datasets.
+4. **Limited Testing**: The application lacks comprehensive test coverage, which is needed for ensuring reliability.
 
-5. **Limited Testing**: The application lacks comprehensive test coverage, which is needed for ensuring reliability.
+5. **Complex Database Relationships**: The normalized database schema may introduce complexity in query operations, which should be monitored for performance.
 
 This document will be updated regularly as development progresses and as additional features are implemented.

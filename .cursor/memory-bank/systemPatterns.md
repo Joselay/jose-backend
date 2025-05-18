@@ -24,6 +24,7 @@ The application follows the NestJS modular architecture pattern, which emphasize
 - Using Prisma ORM for type-safe database operations
 - The core model is the `Schedule` entity
 - Time-based data stored as strings in "HH:MM" format for simplicity
+- Normalized database structure with separate tables for teachers, rooms, subjects, and time slots
 
 ### API Design
 
@@ -52,14 +53,34 @@ The application follows the NestJS modular architecture pattern, which emphasize
 
 ### Repository Pattern
 
-- Prisma service acts as a repository layer for database operations
-- Abstracts database operations from business logic
+- ScheduleRepositoryService abstracts database operations
+- Handles all direct interactions with the Prisma client
+- Focuses on data access concerns only
+- Provides specialized methods for database operations
+- Encapsulates database-specific logic and queries
+
+### Mapper Pattern
+
+- ScheduleMapperService handles entity transformation
+- Maps between Prisma models and domain entities
+- Contains utility methods for type conversions (e.g., Day enum mapping)
+- Centralizes mapping logic to avoid duplication
+- Provides consistent entity conversion throughout the application
+
+### Service Layer Pattern
+
+- ScheduleService implements business logic
+- Uses repository for data access
+- Uses mapper for entity transformations
+- Focuses on orchestration and error handling
+- Keeps business rules separate from data access and presentation
 
 ### Dependency Injection
 
 - NestJS's built-in DI container for managing dependencies
 - Services injected into controllers
-- PrismaService injected where database access is needed
+- Repository and Mapper services injected into main service
+- PrismaService injected into repository service
 
 ### DTO Pattern
 
@@ -87,24 +108,29 @@ graph TD
     A[AppModule] --> B[ScheduleModule]
     B --> C[ScheduleController]
     B --> D[ScheduleService]
+    B --> M[ScheduleMapperService]
+    B --> N[ScheduleRepositoryService]
     C --> D
-    D --> E[PrismaService]
+    D --> M
+    D --> N
+    N --> E[PrismaService]
     E --> F[PostgreSQL Database]
     C --> G[CreateScheduleDto]
     C --> H[UpdateScheduleDto]
     D --> I[Schedule Entity]
+    M --> I
     G --> J[Constants]
     I --> J
     J --> K[Day Enum]
     J --> L[TIME_SLOTS]
-    G --> M[Common Types]
-    M --> N[Regex Patterns]
+    G --> O[Common Types]
+    O --> P[Regex Patterns]
 ```
 
 ## File Organization
 
 - `/src/modules/schedule/controllers`: Contains API controllers
-- `/src/modules/schedule/services`: Contains business logic
+- `/src/modules/schedule/services`: Contains business logic, repository, and mapper services
 - `/src/modules/schedule/dto`: Contains data transfer objects for validation
 - `/src/modules/schedule/entities`: Contains entity definitions
 - `/src/modules/schedule/constants`: Contains enums and constant values
