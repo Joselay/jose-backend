@@ -1,3 +1,4 @@
+import { TIME_FORMAT_REGEX } from '@common/types';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
@@ -7,7 +8,6 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
-import { TIME_FORMAT_REGEX } from '../../../common/types';
 import {
   Day,
   getAvailableEndTimes,
