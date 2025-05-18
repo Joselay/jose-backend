@@ -1,5 +1,3 @@
-import { PrismaService } from '@common/services';
-import { Day } from '@modules/schedule/constants';
 import { CreateScheduleDto, UpdateScheduleDto } from '@modules/schedule/dto';
 import { Schedule } from '@modules/schedule/entities';
 import {
@@ -9,20 +7,24 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { ScheduleMapperService } from './schedule-mapper.service';
+import { ScheduleRepositoryService } from './schedule-repository.service';
 
 @Injectable()
 export class ScheduleService {
   private readonly logger = new Logger(ScheduleService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly repository: ScheduleRepositoryService,
+    private readonly mapper: ScheduleMapperService,
+  ) {}
 
   async createSchedule(data: CreateScheduleDto): Promise<Schedule> {
     try {
-      const scheduleData = await this.prisma.schedule.create({
-        data,
-      });
-
-      return Schedule.fromPrisma(scheduleData);
+      const scheduleData = await this.repository.createSchedule(data);
+      const schedule = this.mapper.mapPrismaToEntity(scheduleData);
+      schedule.day = data.day;
+      return schedule;
     } catch (error) {
       this.logger.error(
         `Failed to create schedule: ${error.message}`,
@@ -34,10 +36,8 @@ export class ScheduleService {
 
   async getFullSchedule(): Promise<Schedule[]> {
     try {
-      const schedulesData = await this.prisma.schedule.findMany({
-        orderBy: { startTime: 'asc' },
-      });
-      return Schedule.fromPrismaArray(schedulesData);
+      const schedulesData = await this.repository.findAllSchedules();
+      return this.mapper.mapPrismaArrayToEntities(schedulesData);
     } catch (error) {
       this.logger.error(
         `Failed to get full schedule: ${error.message}`,
@@ -51,19 +51,16 @@ export class ScheduleService {
 
   async getScheduleByDay(day: string): Promise<Schedule[]> {
     try {
-      const normalizedDay = day.toLowerCase();
-      if (!Object.values(Day).includes(normalizedDay as Day)) {
+      const normalizedDay = day.toUpperCase();
+      const validDays = this.mapper.getValidDays();
+
+      if (!validDays.includes(normalizedDay)) {
         throw new NotFoundException(`Invalid day: ${day}`);
       }
 
-      const schedulesData = await this.prisma.schedule.findMany({
-        where: {
-          day: normalizedDay,
-        },
-        orderBy: { startTime: 'asc' },
-      });
-
-      return Schedule.fromPrismaArray(schedulesData);
+      const schedulesData =
+        await this.repository.findSchedulesByDay(normalizedDay);
+      return this.mapper.mapPrismaArrayToEntities(schedulesData);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -81,34 +78,20 @@ export class ScheduleService {
   async getCurrentClass(): Promise<Schedule | { message: string }> {
     try {
       const now = new Date();
-
       const dayIndex = now.getDay();
 
-      const dayMapping = {
-        1: Day.MONDAY,
-        2: Day.TUESDAY,
-        3: Day.WEDNESDAY,
-        4: Day.THURSDAY,
-        5: Day.FRIDAY,
-        6: Day.SATURDAY,
-      };
-
-      const currentDay = dayMapping[dayIndex as keyof typeof dayMapping];
+      const currentDay = this.mapper.mapDayIndexToDay(dayIndex);
 
       if (!currentDay) {
         return {
-          message: 'No class is currently in session (Sunday has no schedule)',
+          message:
+            'No class is currently in session (Sunday is not a school day)',
         };
       }
 
-      const todayClassesData = await this.prisma.schedule.findMany({
-        where: {
-          day: currentDay,
-        },
-        orderBy: { startTime: 'asc' },
-      });
-
-      const schedules = Schedule.fromPrismaArray(todayClassesData);
+      const schedulesData =
+        await this.repository.findSchedulesByDay(currentDay);
+      const schedules = this.mapper.mapPrismaArrayToEntities(schedulesData);
 
       const currentClass = schedules.find((schedule) =>
         schedule.isInSession(now),
@@ -132,15 +115,13 @@ export class ScheduleService {
 
   async getScheduleById(id: string): Promise<Schedule> {
     try {
-      const scheduleData = await this.prisma.schedule.findUnique({
-        where: { id },
-      });
+      const scheduleData = await this.repository.findScheduleById(id);
 
       if (!scheduleData) {
         throw new NotFoundException(`Schedule with ID ${id} not found`);
       }
 
-      return Schedule.fromPrisma(scheduleData);
+      return this.mapper.mapPrismaToEntity(scheduleData);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -157,12 +138,17 @@ export class ScheduleService {
 
   async updateSchedule(id: string, data: UpdateScheduleDto): Promise<Schedule> {
     try {
-      const scheduleData = await this.prisma.schedule.update({
-        where: { id },
-        data,
-      });
+      const existingSchedule = await this.repository.findScheduleById(id);
 
-      return Schedule.fromPrisma(scheduleData);
+      if (!existingSchedule) {
+        throw new NotFoundException(`Schedule with ID ${id} not found`);
+      }
+
+      const updatedScheduleData = await this.repository.updateSchedule(
+        id,
+        data,
+      );
+      return this.mapper.mapPrismaToEntity(updatedScheduleData);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -182,11 +168,8 @@ export class ScheduleService {
 
   async deleteSchedule(id: string): Promise<Schedule> {
     try {
-      const scheduleData = await this.prisma.schedule.delete({
-        where: { id },
-      });
-
-      return Schedule.fromPrisma(scheduleData);
+      const scheduleData = await this.repository.deleteSchedule(id);
+      return this.mapper.mapPrismaToEntity(scheduleData);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

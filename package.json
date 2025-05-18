@@ -1,6 +1,6 @@
 {
   "name": "jose-backend",
-  "version": "0.0.1",
+  "version": "1.0.0+1",
   "description": "A personal backend application for Jose, featuring productivity tools starting with a schedule management system",
   "author": "Jose",
   "private": true,

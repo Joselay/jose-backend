@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,16 +7,88 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Teacher {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  schedules Schedule[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("teachers")
+  @@index([name])
+}
+
+model Room {
+  id        String     @id @default(uuid())
+  number    String     @unique
+  building  String?
+  capacity  Int?
+  schedules Schedule[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("rooms")
+  @@index([number])
+}
+
+model Subject {
+  id           String     @id @default(uuid())
+  code         String     @unique
+  name         String
+  description  String?
+  creditHours  Int?
+  schedules    Schedule[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("subjects")
+  @@index([code])
+}
+
+model TimeSlot {
+  id        String     @id @default(uuid())
+  startTime String
+  endTime   String
+  schedules Schedule[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([startTime, endTime])
+  @@map("time_slots")
+  @@index([startTime, endTime])
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
 model Schedule {
   id          String   @id @default(uuid())
-  teacherName String
-  room        String
-  startTime   String   
-  endTime     String   
-  day         String   
-  subject     String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  teacherId   String
+  room        Room     @relation(fields: [roomId], references: [id])
+  roomId      String
+  timeSlot    TimeSlot @relation(fields: [timeSlotId], references: [id])
+  timeSlotId  String
+  day         Day
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+  subjectId   String
+  semester    String?
+  year        String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@unique([roomId, timeSlotId, day])
+  @@unique([teacherId, timeSlotId, day])
   @@map("schedules")
+  @@index([day])
+  @@index([teacherId])
+  @@index([roomId])
+  @@index([timeSlotId])
+  @@index([subjectId])
 }
