@@ -17,7 +17,7 @@ The application follows the NestJS modular architecture pattern, which emphasize
 - Fixed time slots: 5:45-6:45pm, 6:45-7:45pm, and 7:45-8:45pm
 - One hour duration for all classes
 - Fixed set of valid time slots for consistency
-- Teachers can have profile avatars stored in Cloudinary or locally
+- Teachers can have profile avatars stored in Cloudinary
 
 ### Database Schema
 
@@ -30,22 +30,22 @@ The application follows the NestJS modular architecture pattern, which emphasize
 
 ### File Storage
 
-- Dual storage strategy with Cloudinary (primary) and local storage (fallback)
-- Environment-based decision for storage location
-- Automatic fallback to local storage when Cloudinary is not configured
-- Cloud storage for production environments
-- Local storage for development and testing
-- URL generation based on storage location
+- Cloudinary cloud storage for all file uploads
+- No local file storage option
+- Cloudinary credentials required for the application to function
+- Image optimization handled by Cloudinary
+- Secure URLs provided by Cloudinary
+- Direct upload to Cloudinary from memory
 
 ### API Design
 
-- RESTful API endpoints following standard conventions
-- Proper input validation using class-validator decorators
-- Swagger documentation using NestJS Swagger integration
-- Standard CRUD operations for schedule and teacher entries
-- Special endpoints for filtering by day and finding current active class
-- File upload endpoints for teacher avatars
-- Multipart/form-data support for file uploads
+- RESTful API design principles
+- Consistent endpoint naming
+- Proper HTTP status code usage
+- Descriptive error messages
+- Swagger/OpenAPI documentation
+- Secure API documentation with basic authentication
+- Input validation using DTOs and class-validator
 
 ### Validation
 
@@ -87,14 +87,6 @@ The application follows the NestJS modular architecture pattern, which emphasize
 - Uses mapper for entity transformations
 - Focuses on orchestration and error handling
 - Keeps business rules separate from data access and presentation
-
-### Strategy Pattern
-
-- UploadService implements different storage strategies
-- Dynamically selects between Cloudinary and local storage
-- Encapsulates the complexity of each storage method
-- Provides a unified interface for file uploads
-- Allows for easy switching between strategies
 
 ### Factory Method Pattern
 
@@ -180,7 +172,6 @@ graph TD
     O --> P[Regex Patterns]
 
     US --> CL[Cloudinary]
-    US --> LS[Local Storage]
 ```
 
 ## File Organization
@@ -198,4 +189,3 @@ graph TD
 - `/src/common/types`: Contains shared types and regex patterns
 - `/src/common/config`: Contains configuration files like CloudinaryConfig
 - `/prisma`: Contains database schema and migrations
-- `/uploads`: Contains locally stored uploaded files

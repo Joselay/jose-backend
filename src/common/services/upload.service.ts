@@ -1,7 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as streamifier from 'streamifier';
 
 interface CloudinaryUploadResult {
@@ -21,40 +19,35 @@ interface UploadedFile {
 @Injectable()
 export class UploadService {
   private readonly logger = new Logger(UploadService.name);
-  private readonly uploadDir = 'uploads/avatars';
 
   constructor() {
-    if (!fs.existsSync(this.uploadDir)) {
-      fs.mkdirSync(this.uploadDir, { recursive: true });
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
+      this.logger.warn(
+        'Cloudinary credentials not configured. File uploads will fail.',
+      );
+    } else {
+      this.logger.log(
+        'Cloudinary configuration detected. Upload service ready.',
+      );
     }
   }
 
   async uploadFile(file: UploadedFile): Promise<string> {
     if (
-      process.env.CLOUDINARY_CLOUD_NAME &&
-      process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_SECRET
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
     ) {
-      return this.uploadToCloudinary(file);
-    } else {
-      return this.saveLocally(file);
+      throw new BadRequestException(
+        'Cloudinary is not configured. File uploads are unavailable.',
+      );
     }
-  }
 
-  private async saveLocally(file: UploadedFile): Promise<string> {
-    try {
-      const filename = `${Date.now()}-${file.originalname.replace(/\s/g, '_')}`;
-      const filepath = path.join(this.uploadDir, filename);
-
-      fs.writeFileSync(filepath, file.buffer);
-
-      const baseUrl =
-        process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-      return `${baseUrl}/${filepath}`;
-    } catch (error) {
-      this.logger.error(`Failed to save file locally: ${error.message}`);
-      throw error;
-    }
+    return this.uploadToCloudinary(file);
   }
 
   private async uploadToCloudinary(file: UploadedFile): Promise<string> {

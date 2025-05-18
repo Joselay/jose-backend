@@ -1,4 +1,7 @@
+import { Logger } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
+
+const logger = new Logger('CloudinaryConfig');
 
 export const CloudinaryConfig = {
   configureCloudinary: () => {
@@ -12,12 +15,13 @@ export const CloudinaryConfig = {
         api_key: apiKey,
         api_secret: apiSecret,
       });
-      console.log(
-        '✅ Cloudinary configured successfully - uploads will go to Cloudinary',
-      );
+      logger.log('✅ Cloudinary configured successfully');
     } else {
-      console.warn(
-        '⚠️ Cloudinary credentials not found - uploads will be stored locally',
+      logger.error(
+        '❌ Cloudinary credentials missing. Application may not function correctly!',
+      );
+      logger.error(
+        'Please configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.',
       );
     }
   },

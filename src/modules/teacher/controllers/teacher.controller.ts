@@ -72,7 +72,7 @@ export class TeacherController {
   @ApiOperation({
     summary: 'Update a teacher',
     description:
-      'Update teacher details including name and avatar URL. You can set avatar directly with a URL using this endpoint or upload an image file using the dedicated avatar upload endpoint.',
+      'Update teacher details including name. To set or update the avatar, use the dedicated avatar upload endpoint.',
   })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
   @ApiBody({ type: UpdateTeacherDto })
@@ -106,7 +106,7 @@ export class TeacherController {
   @ApiOperation({
     summary: 'Upload a teacher avatar image',
     description:
-      'Upload an image file to be used as the teacher avatar. The file will be processed and stored, and the resulting URL will update the teacher record.',
+      'Upload an image file to be used as the teacher avatar. The file will be uploaded to Cloudinary cloud storage, and the resulting URL will update the teacher record.',
   })
   @ApiParam({ name: 'id', description: 'Teacher ID' })
   @ApiBody({
@@ -116,17 +116,22 @@ export class TeacherController {
         file: {
           type: 'string',
           format: 'binary',
-          description: 'Teacher avatar image file',
+          description:
+            'Teacher avatar image file (will be stored in Cloudinary)',
         },
       },
     },
   })
   @ApiResponse({
     status: 200,
-    description: 'The teacher avatar has been successfully uploaded.',
+    description:
+      'The teacher avatar has been successfully uploaded to Cloudinary.',
   })
   @ApiResponse({ status: 404, description: 'Teacher not found.' })
-  @ApiResponse({ status: 400, description: 'Invalid file.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid file or Cloudinary not configured.',
+  })
   async uploadTeacherAvatar(
     @Param('id') id: string,
     @UploadedFile() file: any,

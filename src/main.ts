@@ -3,8 +3,7 @@ import { AppModule } from '@modules/app';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as express from 'express';
-import { join } from 'path';
+import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,13 +12,22 @@ async function bootstrap() {
 
   CloudinaryConfig.configureCloudinary();
 
-  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
-
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+    }),
+  );
+
+  app.use(
+    ['/api', '/api-json'],
+    basicAuth({
+      challenge: true,
+      users: {
+        [process.env.SWAGGER_USER || 'admin']:
+          process.env.SWAGGER_PASSWORD || 'admin',
+      },
     }),
   );
 
@@ -41,7 +49,7 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(
-    `Swagger documentation available at: http://localhost:${port}/api`,
+    `Swagger documentation available at: http://localhost:${port}/api (protected with authentication)`,
   );
 }
 bootstrap();

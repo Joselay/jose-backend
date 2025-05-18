@@ -19,33 +19,52 @@ The main focus has been implementing and refining core features:
 
 3. Implemented teacher management with avatar support:
 
-   - Created Teacher module with complete CRUD operations
-   - Added avatar functionality with support for both direct URLs and file uploads
-   - Integrated Cloudinary for cloud-based image storage
-   - Implemented file upload functionality with fallback to local storage
+   - Created TeacherController for CRUD operations
+   - Added TeacherService and TeacherRepositoryService
+   - Implemented avatar support using Cloudinary exclusively for storage
+   - Set up file upload functionality for avatars
+   - Enhanced data validation for teacher data
 
-4. Improved error handling and type safety:
+4. Improved API configuration and documentation:
 
-   - Enhanced error handling in service methods with proper logging
-   - Improved type safety throughout the application
-   - Added validation using class-validator decorators
+   - Standardized on port 3000 for all environments
+   - Added Swagger documentation with basic authentication
+   - Made Cloudinary mandatory for file storage
+   - Removed fallback to local storage
+   - Added proper error handling for missing Cloudinary credentials
 
 ## Recent Changes
 
-1. **Architecture Improvements**:
+- Port standardized to 3000 across the codebase
+- Consolidated avatar update endpoints to a single endpoint
+- Updated file upload system to use Cloudinary exclusively
+- Removed local file storage and static file serving
+- Added authentication for Swagger documentation
+- Enhanced error handling for file upload operations
+- Updated documentation to reflect the changes
 
-   - Adopted Repository Pattern to isolate database operations
-   - Implemented Mapper Pattern for entity transformations
-   - Separated concerns in the service layer for better maintainability
-   - Created specialized services with clear responsibilities
+## Next Steps
 
-2. **Database Schema Improvements**:
+1. Add more validation to file uploads (size and type validation)
+2. Implement pagination for schedule listings to handle larger datasets
+3. Add sorting options for schedule endpoints
+4. Add filtering by teacher name and subject
+5. Write unit tests for the existing services and repositories
 
-   - Normalized database schema with appropriate relationships
-   - Established one-to-many relationships for teachers, rooms, and subjects
-   - Created proper constraints to prevent scheduling conflicts
-   - Removed Sunday from Day enum as per business rules
-   - Added avatar field to Teacher model
+## Active Decisions and Considerations
+
+- **File Storage**: Decided to use Cloudinary exclusively for all file storage to ensure consistent behavior across environments and simplify the codebase.
+- **API Documentation Security**: Added basic authentication to protect Swagger documentation from unauthorized access.
+- **Error Handling**: Enhanced error handling to provide clear messages when Cloudinary credentials are missing.
+- **Port Standardization**: Standardized on port 3000 across the codebase for consistency.
+- **API Schema**: Continuously refining API schema to ensure clear and consistent endpoints.
+- **Code Organization**: Maintaining separation of concerns with distinct modules and services.
+- **Environment Configuration**: Using environment variables for all configurable values.
+  - Normalized database schema with appropriate relationships
+  - Established one-to-many relationships for teachers, rooms, and subjects
+  - Created proper constraints to prevent scheduling conflicts
+  - Removed Sunday from Day enum as per business rules
+  - Added avatar field to Teacher model
 
 3. **Avatar Functionality**:
 

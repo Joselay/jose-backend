@@ -16,7 +16,7 @@ A personal backend application for Jose, featuring various productivity tools st
 ### Teacher Management
 
 - Complete CRUD operations for teacher records
-- Profile avatar support with cloud storage
+- Profile avatar support with Cloudinary cloud storage
 - File upload for teacher avatars
 - Automatic avatar URL generation
 - Default avatar fallback for teachers without photos
@@ -24,10 +24,9 @@ A personal backend application for Jose, featuring various productivity tools st
 ### Storage System
 
 - Cloud-based storage with Cloudinary integration
-- Local file storage fallback for development
-- Automatic directory creation for uploads
 - Secure and optimized file handling
-- Environment-based storage selection
+- Automatic image optimization via Cloudinary
+- Secure URL generation for uploaded assets
 
 ### Future Features (Planned)
 
@@ -42,7 +41,7 @@ A personal backend application for Jose, featuring various productivity tools st
 - **ORM**: Prisma (v6)
 - **Validation**: class-validator and class-transformer
 - **Documentation**: Swagger (NestJS Swagger v11)
-- **File Storage**: Cloudinary, Multer, local file system
+- **File Storage**: Cloudinary
 - **Testing**: Jest (v29)
 
 ## Setup Instructions
@@ -52,7 +51,7 @@ A personal backend application for Jose, featuring various productivity tools st
 - Node.js (v16 or higher)
 - npm or yarn
 - PostgreSQL database (or Neon cloud database)
-- Cloudinary account (optional for cloud storage)
+- Cloudinary account (required for avatar uploads)
 
 ### Installation
 
@@ -74,7 +73,7 @@ npm install
    - Copy `.env.example` to `.env`
    - Update the `DATABASE_URL` with your PostgreSQL connection string (or Neon database URL)
    - Set `PORT` to your preferred port (defaults to 3000)
-   - For Cloudinary integration, add your credentials:
+   - **Required**: For Cloudinary integration, add your credentials:
      ```
      CLOUDINARY_CLOUD_NAME=your_cloud_name
      CLOUDINARY_API_KEY=your_api_key
@@ -122,6 +121,15 @@ Once the application is running, you can access the Swagger documentation at:
 http://localhost:3000/api
 ```
 
+The Swagger documentation is protected with basic authentication. Default credentials are set in your `.env` file:
+
+```
+SWAGGER_USER=jose
+SWAGGER_PASSWORD=secure_password
+```
+
+You can customize these credentials by modifying the environment variables.
+
 ## Database Management
 
 - Generate Prisma client: `npm run prisma:generate`
@@ -153,7 +161,6 @@ jose-backend/
 │   │       ├── entities/  # Database entities
 │   │       └── services/  # Business logic services
 │   └── main.ts            # Application entry point
-├── uploads/               # Local file storage (avatars, etc.)
 └── test/                  # Test files
 ```
 
@@ -166,7 +173,7 @@ jose-backend/
   - Third Period: 7:45pm - 8:45pm
 - All classes are one hour in duration
 - Input validation ensures only valid time slots and days are accepted
-- Teachers can have profile avatars stored in Cloudinary or locally
+- Teachers can have profile avatars stored in Cloudinary
 
 ## API Endpoints
 
@@ -184,14 +191,14 @@ jose-backend/
 
 ### Teacher Endpoints
 
-| Method | Endpoint               | Description           |
-| ------ | ---------------------- | --------------------- |
-| GET    | `/teachers`            | Get all teachers      |
-| GET    | `/teachers/:id`        | Get a teacher by ID   |
-| POST   | `/teachers`            | Create a new teacher  |
-| PUT    | `/teachers/:id`        | Update a teacher      |
-| DELETE | `/teachers/:id`        | Delete a teacher      |
-| POST   | `/teachers/:id/avatar` | Upload teacher avatar |
+| Method | Endpoint               | Description                         |
+| ------ | ---------------------- | ----------------------------------- |
+| GET    | `/teachers`            | Get all teachers                    |
+| GET    | `/teachers/:id`        | Get a teacher by ID                 |
+| POST   | `/teachers`            | Create a new teacher                |
+| PUT    | `/teachers/:id`        | Update a teacher                    |
+| DELETE | `/teachers/:id`        | Delete a teacher                    |
+| POST   | `/teachers/:id/avatar` | Upload teacher avatar to Cloudinary |
 
 ## License
 

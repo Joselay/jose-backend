@@ -16,14 +16,15 @@
 
 ### File Storage
 
-- **Cloudinary**: Cloud-based image and media storage
+- **Cloudinary**: Cloud-based image and media storage for all file uploads
 - **Multer**: Middleware for handling multipart/form-data
 - **Streamifier**: For converting buffers to streams for Cloudinary upload
-- **Local File System**: For fallback storage when Cloudinary is not available
 
 ### API Documentation
 
-- **Swagger/OpenAPI**: For API documentation via NestJS Swagger module
+- **Swagger/OpenAPI**: For API documentation
+- **@nestjs/swagger**: NestJS integration for Swagger
+- **express-basic-auth**: Basic authentication for securing API documentation
 
 ### Validation
 
@@ -43,10 +44,12 @@
 - **DATABASE_URL**: Connection string for Neon PostgreSQL
 - **PORT**: Port for the application to run on (defaults to 3000)
 - **NODE_ENV**: Environment mode (development, production)
-- **CLOUDINARY_CLOUD_NAME**: Cloudinary cloud name
-- **CLOUDINARY_API_KEY**: Cloudinary API key
-- **CLOUDINARY_API_SECRET**: Cloudinary API secret
-- **BASE_URL**: Base URL for the application (used for local file URLs)
+- **CLOUDINARY_CLOUD_NAME**: Cloudinary cloud name (required)
+- **CLOUDINARY_API_KEY**: Cloudinary API key (required)
+- **CLOUDINARY_API_SECRET**: Cloudinary API secret (required)
+- **BASE_URL**: Base URL for the application
+- **SWAGGER_USER**: Username for Swagger documentation authentication
+- **SWAGGER_PASSWORD**: Password for Swagger documentation authentication
 
 ### Local Development Commands
 
@@ -70,7 +73,7 @@ jose-backend/
 │   │   │   └── cloudinary.config.ts  # Cloudinary configuration
 │   │   ├── services/           # Shared services
 │   │   │   ├── prisma.service.ts  # Prisma service for DI
-│   │   │   └── upload.service.ts  # File upload service
+│   │   │   └── upload.service.ts  # File upload service (Cloudinary)
 │   │   └── types/              # Shared types and interfaces
 │   ├── modules/                # Feature modules
 │   │   ├── app/                # App module (root)
@@ -96,9 +99,6 @@ jose-backend/
 │   │       │   └── teacher-repository.service.ts  # Data access
 │   │       └── teacher.module.ts  # Module definition
 │   └── main.ts                 # Application entry point
-├── uploads/                    # Local file storage directory
-│   └── avatars/               # Teacher avatar storage
-├── .env                        # Environment variables
 └── package.json                # Dependencies and scripts
 ```
 
@@ -113,16 +113,15 @@ jose-backend/
 ### API Design
 
 - Following RESTful principles for API design
-- Using Swagger for API documentation
+- Using Swagger for API documentation with basic auth protection
 - Using class-validator for input validation
 - Using multipart/form-data for file uploads
 
 ### File Storage
 
-- Using Cloudinary as primary storage for production
-- Using local file system as fallback for development
+- Using Cloudinary exclusively for all file storage
 - Storing avatar URLs in the database, not the files themselves
-- Static file serving from the uploads directory
+- Cloudinary credentials are required for the application to function properly
 
 ### Code Style
 
@@ -137,7 +136,6 @@ jose-backend/
 - Service Layer Pattern for business logic
 - DTO Pattern for input validation
 - Entity Pattern for domain models
-- Strategy Pattern for file storage
 
 ## Dependencies
 
@@ -146,6 +144,7 @@ jose-backend/
 - `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`: NestJS framework
 - `@nestjs/config`: Configuration management
 - `@nestjs/swagger`: API documentation
+- `express-basic-auth`: Authentication for Swagger documentation
 - `@prisma/client`: Prisma ORM client
 - `class-validator`, `class-transformer`: Validation and transformation
 - `cloudinary`: Cloud-based image storage
