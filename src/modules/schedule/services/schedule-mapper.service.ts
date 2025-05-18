@@ -13,6 +13,8 @@ export class ScheduleMapperService {
     schedule.endTime = scheduleData.timeSlot.endTime;
     schedule.day = this.mapPrismaDayToEnum(scheduleData.day);
     schedule.subject = scheduleData.subject.code;
+    schedule.semester = scheduleData.semester;
+    schedule.year = scheduleData.year;
     schedule.createdAt = scheduleData.createdAt;
     schedule.updatedAt = scheduleData.updatedAt;
     return schedule;

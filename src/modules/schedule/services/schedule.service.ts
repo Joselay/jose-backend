@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Day, Prisma } from '@prisma/client';
 import { ScheduleMapperService } from './schedule-mapper.service';
 import { ScheduleRepositoryService } from './schedule-repository.service';
 
@@ -89,16 +89,19 @@ export class ScheduleService {
         };
       }
 
-      const schedulesData =
-        await this.repository.findSchedulesByDay(currentDay);
-      const schedules = this.mapper.mapPrismaArrayToEntities(schedulesData);
+      // Format the current time as "HH:MM"
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const currentTime = `${hours}:${minutes}`;
 
-      const currentClass = schedules.find((schedule) =>
-        schedule.isInSession(now),
+      // Use the optimized repository method
+      const scheduleData = await this.repository.findCurrentSchedule(
+        currentDay as Day,
+        currentTime,
       );
 
-      if (currentClass) {
-        return currentClass;
+      if (scheduleData) {
+        return this.mapper.mapPrismaToEntity(scheduleData);
       }
 
       return { message: 'No class is currently in session' };

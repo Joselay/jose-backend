@@ -8,8 +8,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
+  MaxLength,
   MinLength,
   Validate,
 } from 'class-validator';
@@ -57,27 +59,27 @@ export class CreateScheduleDto {
   room: string;
 
   @ApiProperty({
-    description: 'The start time in 24-hour format (HH:MM)',
-    example: '17:45',
+    description: 'The start time in 24-hour format (H:MM)',
+    example: '5:45',
     enum: getAvailableStartTimes(),
   })
   @IsNotEmpty()
   @IsString()
   @Matches(TIME_FORMAT_REGEX, {
-    message: 'Start time must be in the format HH:MM (24-hour format)',
+    message: 'Start time must be in the format H:MM or HH:MM (24-hour format)',
   })
   @Validate(IsValidStartTime)
   startTime: string;
 
   @ApiProperty({
-    description: 'The end time in 24-hour format (HH:MM)',
-    example: '18:45',
+    description: 'The end time in 24-hour format (H:MM)',
+    example: '6:45',
     enum: getAvailableEndTimes(),
   })
   @IsNotEmpty()
   @IsString()
   @Matches(TIME_FORMAT_REGEX, {
-    message: 'End time must be in the format HH:MM (24-hour format)',
+    message: 'End time must be in the format H:MM or HH:MM (24-hour format)',
   })
   @Validate(IsValidEndTime)
   endTime: string;
@@ -98,4 +100,24 @@ export class CreateScheduleDto {
   @IsNotEmpty()
   @IsString()
   subject: string;
+
+  @ApiProperty({
+    description: 'The semester number or name',
+    example: '1',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  semester?: string;
+
+  @ApiProperty({
+    description: 'The academic year',
+    example: '2025',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  year?: string;
 }

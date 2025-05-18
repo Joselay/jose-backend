@@ -1,11 +1,20 @@
 import {
   Day,
   findTimeSlotByStartTime,
+  mapTimeToPeriod,
   TIME_SLOTS,
 } from '@modules/schedule/constants';
 import { ApiProperty } from '@nestjs/swagger';
+import { TimeSlotEnum } from '@prisma/client';
 import { Expose, Transform, Type } from 'class-transformer';
-import { IsDate, IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class Schedule {
   @ApiProperty({
@@ -36,7 +45,7 @@ export class Schedule {
 
   @ApiProperty({
     description: 'Start time in 24-hour format (HH:MM)',
-    example: '17:45',
+    example: '5:45',
     enum: TIME_SLOTS.map((slot) => slot.startTime),
   })
   @Expose()
@@ -46,7 +55,7 @@ export class Schedule {
 
   @ApiProperty({
     description: 'End time in 24-hour format (HH:MM)',
-    example: '18:45',
+    example: '6:45',
     enum: TIME_SLOTS.map((slot) => slot.endTime),
   })
   @Expose()
@@ -71,6 +80,26 @@ export class Schedule {
   @IsString()
   @IsNotEmpty()
   subject: string;
+
+  @ApiProperty({
+    description: 'The semester',
+    example: '1',
+    required: false,
+  })
+  @Expose()
+  @IsString()
+  @IsOptional()
+  semester?: string;
+
+  @ApiProperty({
+    description: 'The academic year',
+    example: '2025',
+    required: false,
+  })
+  @Expose()
+  @IsString()
+  @IsOptional()
+  year?: string;
 
   @ApiProperty({
     description: 'Creation timestamp',
@@ -114,6 +143,10 @@ export class Schedule {
 
   getTimeSlot() {
     return findTimeSlotByStartTime(this.startTime);
+  }
+
+  getPeriodEnum(): TimeSlotEnum {
+    return mapTimeToPeriod(this.startTime);
   }
 
   getPeriodLabel(): string | undefined {

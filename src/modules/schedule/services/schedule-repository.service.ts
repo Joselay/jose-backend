@@ -1,7 +1,7 @@
 import { PrismaService } from '@common/services';
 import { CreateScheduleDto, UpdateScheduleDto } from '@modules/schedule/dto';
 import { Injectable, Logger } from '@nestjs/common';
-import { Day } from '@prisma/client';
+import { Day, TimeSlotEnum } from '@prisma/client';
 
 @Injectable()
 export class ScheduleRepositoryService {
@@ -15,6 +15,23 @@ export class ScheduleRepositoryService {
     subject: true,
     timeSlot: true,
   };
+
+  // Convert time to period enum for more efficient querying
+  private mapTimeToPeriod(startTime: string): TimeSlotEnum {
+    switch (startTime) {
+      case '5:45':
+        return TimeSlotEnum.FIRST_PERIOD;
+      case '6:45':
+        return TimeSlotEnum.SECOND_PERIOD;
+      case '7:45':
+        return TimeSlotEnum.THIRD_PERIOD;
+      default:
+        this.logger.warn(
+          `Unknown start time: ${startTime}, defaulting to FIRST_PERIOD`,
+        );
+        return TimeSlotEnum.FIRST_PERIOD;
+    }
+  }
 
   async findOrCreateTeacher(name: string) {
     return this.prisma.teacher.upsert({
@@ -41,6 +58,8 @@ export class ScheduleRepositoryService {
   }
 
   async findOrCreateTimeSlot(startTime: string, endTime: string) {
+    const period = this.mapTimeToPeriod(startTime);
+
     return this.prisma.timeSlot.upsert({
       where: {
         startTime_endTime: {
@@ -48,11 +67,21 @@ export class ScheduleRepositoryService {
           endTime,
         },
       },
-      update: {},
+      update: {
+        period, // Ensure period is up to date
+      },
       create: {
         startTime,
         endTime,
+        period,
       },
+    });
+  }
+
+  // Find time slot by period (more efficient than by startTime/endTime)
+  async findTimeSlotByPeriod(period: TimeSlotEnum) {
+    return this.prisma.timeSlot.findFirst({
+      where: { period },
     });
   }
 
@@ -72,6 +101,8 @@ export class ScheduleRepositoryService {
         subject: { connect: { id: subject.id } },
         timeSlot: { connect: { id: timeSlot.id } },
         day: data.day.toUpperCase() as Day,
+        semester: data.semester,
+        year: data.year,
       },
       include: this.scheduleInclude,
     });
@@ -80,11 +111,14 @@ export class ScheduleRepositoryService {
   async findAllSchedules() {
     return this.prisma.schedule.findMany({
       include: this.scheduleInclude,
-      orderBy: {
-        timeSlot: {
-          startTime: 'asc',
+      orderBy: [
+        { day: 'asc' },
+        {
+          timeSlot: {
+            period: 'asc',
+          },
         },
-      },
+      ],
     });
   }
 
@@ -96,9 +130,35 @@ export class ScheduleRepositoryService {
       include: this.scheduleInclude,
       orderBy: {
         timeSlot: {
-          startTime: 'asc',
+          period: 'asc', // More efficient sorting by enum
         },
       },
+    });
+  }
+
+  async findCurrentSchedule(day: Day, currentTime: string) {
+    // Extract hours and minutes from current time (format: HH:MM)
+    const [hours, minutes] = currentTime.split(':').map(Number);
+
+    // Determine which period we're in
+    let period: TimeSlotEnum;
+
+    if (hours < 6 || (hours === 6 && minutes < 45)) {
+      period = TimeSlotEnum.FIRST_PERIOD;
+    } else if (hours < 7 || (hours === 7 && minutes < 45)) {
+      period = TimeSlotEnum.SECOND_PERIOD;
+    } else {
+      period = TimeSlotEnum.THIRD_PERIOD;
+    }
+
+    return this.prisma.schedule.findFirst({
+      where: {
+        day,
+        timeSlot: {
+          period,
+        },
+      },
+      include: this.scheduleInclude,
     });
   }
 
@@ -137,6 +197,14 @@ export class ScheduleRepositoryService {
 
     if (data.day) {
       updateData.day = data.day.toUpperCase() as Day;
+    }
+
+    if (data.semester) {
+      updateData.semester = data.semester;
+    }
+
+    if (data.year) {
+      updateData.year = data.year;
     }
 
     return this.prisma.schedule.update({

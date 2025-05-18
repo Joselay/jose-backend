@@ -9,8 +9,8 @@ datasource db {
 
 model Teacher {
   id        String     @id @default(uuid())
-  name      String     @unique
-  avatar    String?    
+  name      String     @unique @db.VarChar(100)
+  avatar    String?    @db.Text
   schedules Schedule[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -21,9 +21,9 @@ model Teacher {
 
 model Room {
   id        String     @id @default(uuid())
-  number    String     @unique
-  building  String?
-  capacity  Int?
+  number    String     @unique @db.VarChar(20)
+  building  String?    @db.VarChar(100)
+  capacity  Int?       @db.SmallInt
   schedules Schedule[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -34,10 +34,10 @@ model Room {
 
 model Subject {
   id           String     @id @default(uuid())
-  code         String     @unique
-  name         String
-  description  String?
-  creditHours  Int?
+  code         String     @unique @db.VarChar(20)
+  name         String     @db.VarChar(100)
+  description  String?    @db.Text
+  creditHours  Int?       @db.SmallInt
   schedules    Schedule[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -46,17 +46,24 @@ model Subject {
   @@index([code])
 }
 
+enum TimeSlotEnum {
+  FIRST_PERIOD
+  SECOND_PERIOD
+  THIRD_PERIOD
+}
+
 model TimeSlot {
-  id        String     @id @default(uuid())
-  startTime String
-  endTime   String
+  id        String       @id @default(uuid())
+  startTime String       @db.VarChar(5)
+  endTime   String       @db.VarChar(5)
+  period    TimeSlotEnum @default(FIRST_PERIOD)
   schedules Schedule[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@unique([startTime, endTime])
   @@map("time_slots")
-  @@index([startTime, endTime])
+  @@index([period])
 }
 
 enum Day {
@@ -69,27 +76,27 @@ enum Day {
 }
 
 model Schedule {
-  id          String   @id @default(uuid())
-  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  id          String      @id @default(uuid())
+  teacher     Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   teacherId   String
-  room        Room     @relation(fields: [roomId], references: [id])
+  room        Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId      String
-  timeSlot    TimeSlot @relation(fields: [timeSlotId], references: [id])
+  timeSlot    TimeSlot    @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
   timeSlotId  String
   day         Day
-  subject     Subject  @relation(fields: [subjectId], references: [id])
+  subject     Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   subjectId   String
-  semester    String?
-  year        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  semester    String?     @db.VarChar(20)
+  year        String?     @db.VarChar(10)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@unique([roomId, timeSlotId, day])
   @@unique([teacherId, timeSlotId, day])
+
+  @@index([day, timeSlotId])
+  @@index([teacherId, day])
+  @@index([roomId, day])
+  
   @@map("schedules")
-  @@index([day])
-  @@index([teacherId])
-  @@index([roomId])
-  @@index([timeSlotId])
-  @@index([subjectId])
 }

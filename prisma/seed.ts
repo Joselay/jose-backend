@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { Day, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-import { Day } from '@prisma/client';
+type TimeSlotType = 'FIRST_PERIOD' | 'SECOND_PERIOD' | 'THIRD_PERIOD';
 
 interface Teacher {
   id: string;
@@ -34,6 +34,7 @@ interface TimeSlot {
   id: string;
   startTime: string;
   endTime: string;
+  period: TimeSlotType;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -111,9 +112,21 @@ async function main() {
   }
 
   const timeSlotsData = [
-    { startTime: '5:45', endTime: '6:45' },
-    { startTime: '6:45', endTime: '7:45' },
-    { startTime: '7:45', endTime: '8:45' },
+    {
+      startTime: '5:45',
+      endTime: '6:45',
+      period: 'FIRST_PERIOD' as TimeSlotType,
+    },
+    {
+      startTime: '6:45',
+      endTime: '7:45',
+      period: 'SECOND_PERIOD' as TimeSlotType,
+    },
+    {
+      startTime: '7:45',
+      endTime: '8:45',
+      period: 'THIRD_PERIOD' as TimeSlotType,
+    },
   ];
 
   const timeSlots: TimeSlot[] = [];
@@ -121,7 +134,7 @@ async function main() {
     const timeSlot = await prisma.timeSlot.create({ data });
     timeSlots.push(timeSlot as TimeSlot);
     console.log(
-      `Created time slot: ${timeSlot.startTime} - ${timeSlot.endTime}`,
+      `Created time slot: ${timeSlot.startTime} - ${timeSlot.endTime} (${timeSlot.period})`,
     );
   }
 
